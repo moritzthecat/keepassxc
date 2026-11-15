@@ -893,6 +893,22 @@ void TestGui::testRemoteSyncAutomationLocalRemoteFile()
     }
     QVERIFY(banner);
     QVERIFY(banner->text().contains("status code: 3"));
+
+    // Locking replaces the main view with the unlock view; the failure must survive that switch
+    MessageWidget* visibleBanner = nullptr;
+    for (auto* widget : m_dbWidget->findChildren<MessageWidget*>()) {
+        if (widget->isVisible() && widget->text().contains("Remote sync")) {
+            visibleBanner = widget;
+            break;
+        }
+    }
+    QVERIFY2(visibleBanner, "remote sync failure must still be visible after locking");
+    QVERIFY(visibleBanner->text().contains("status code: 3"));
+    fprintf(stderr,
+            "[diag] banner visible=%d hidden=%d parentVisible=%d\n",
+            banner->isVisible(),
+            banner->isHidden(),
+            banner->parentWidget() ? banner->parentWidget()->isVisible() : -1);
     // PR #13779 appends the command's stderr on a second line; without it only the
     // exit code is reported. Assert the detail whenever it is available.
     if (banner->text().contains('\n')) {
