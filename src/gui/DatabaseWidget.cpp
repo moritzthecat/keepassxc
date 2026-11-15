@@ -1233,6 +1233,9 @@ void DatabaseWidget::finishSync(const RemoteParams* params, RemoteHandler::Remot
     ++m_remoteSyncCount;
     setDisabled(false);
     emit updateSyncProgress(-1, "");
+    // End the in-flight state before notifying, otherwise observers still see
+    // "sync in progress" while the result is being reported.
+    m_remoteAutomation->endSync();
     if (result.success) {
         m_lastRemoteSyncProfile = params->name;
         m_lastRemoteSyncTime = QDateTime::currentDateTime();
@@ -1246,8 +1249,6 @@ void DatabaseWidget::finishSync(const RemoteParams* params, RemoteHandler::Remot
         emit databaseSyncFailed(params->name, result.errorMessage);
         showMessage(m_lastRemoteSyncMessage, MessageWidget::Error, true, 0);
     }
-
-    m_remoteAutomation->endSync();
 
     if (m_remoteAutomation->hasPendingSync()) {
         // Triggers that arrived while this sync was running are collapsed into
@@ -1326,6 +1327,20 @@ QString DatabaseWidget::remoteSyncStatus() const
         return {};
     }
     return tr("\xE2\x87\x84 %1").arg(m_lastRemoteSyncTime.toString("hh:mm"));
+}
+
+QString DatabaseWidget::remoteSyncStatusText() const
+{
+    if (m_remoteAutomation->syncInProgress()) {
+        return tr("Remote sync in progress\u2026");
+    }
+    if (m_lastRemoteSyncFailed) {
+        return tr("Remote sync failed (%1)").arg(m_lastRemoteSyncProfile);
+    }
+    if (!m_lastRemoteSyncTime.isValid()) {
+        return {};
+    }
+    return tr("Last synced %1 via %2").arg(m_lastRemoteSyncTime.toString("hh:mm"), m_lastRemoteSyncProfile);
 }
 
 QList<RemoteParams*> DatabaseWidget::getRemoteParams() const
