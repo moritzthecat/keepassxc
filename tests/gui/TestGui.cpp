@@ -502,9 +502,8 @@ void TestGui::testRemoteSyncDatabaseRequiresPassword()
 void TestGui::testRemoteSyncErrorDetail()
 {
     RemoteHandler::setRemoteProcessFunc([](QObject* parent) {
-        return QScopedPointer<RemoteProcess>(
-            new MockRemoteProcess(parent, QString(KEEPASSX_TEST_DATA_DIR).append("/SyncDatabase.kdbx"), 1,
-                                  "NAS share not connected"));
+        return QScopedPointer<RemoteProcess>(new MockRemoteProcess(
+            parent, QString(KEEPASSX_TEST_DATA_DIR).append("/SyncDatabase.kdbx"), 1, "NAS share not connected"));
     });
     QSignalSpy dbSyncSpy(m_dbWidget.data(), &DatabaseWidget::databaseSyncFailed);
     prepareAndTriggerRemoteSync();

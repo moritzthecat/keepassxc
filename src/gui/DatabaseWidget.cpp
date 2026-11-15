@@ -1241,8 +1241,8 @@ void DatabaseWidget::finishSync(const RemoteParams* params, RemoteHandler::Remot
     } else {
         m_lastRemoteSyncFailed = true;
         emit databaseSyncFailed(params->name, result.errorMessage);
-        showMessage(tr("Remote sync '%1' failed:\n%2").arg(params->name, result.errorMessage),
-                    MessageWidget::Error, true, 0);
+        showMessage(
+            tr("Remote sync '%1' failed:\n%2").arg(params->name, result.errorMessage), MessageWidget::Error, true, 0);
     }
 
     m_remoteAutomation->endSync();

@@ -216,25 +216,32 @@ void TestMerge::testRemoteSyncSettingsTwoClients()
     m_clock->advanceSecond(1);
     QSharedPointer<Database> nas(createTestDatabase());
 
-    auto dump=[&](const char* tag){
-        fprintf(stderr, "%-12s MAC=%s | WIN=%s | NAS=%s\n", tag,
-            mac->metadata()->customData()->value(CustomData::RemoteProgramSettings).toUtf8().constData(),
-            win->metadata()->customData()->value(CustomData::RemoteProgramSettings).toUtf8().constData(),
-            nas->metadata()->customData()->value(CustomData::RemoteProgramSettings).toUtf8().constData());
+    auto dump = [&](const char* tag) {
+        fprintf(stderr,
+                "%-12s MAC=%s | WIN=%s | NAS=%s\n",
+                tag,
+                mac->metadata()->customData()->value(CustomData::RemoteProgramSettings).toUtf8().constData(),
+                win->metadata()->customData()->value(CustomData::RemoteProgramSettings).toUtf8().constData(),
+                nas->metadata()->customData()->value(CustomData::RemoteProgramSettings).toUtf8().constData());
     };
     dump("start");
-    syncPair(mac, nas); dump("mac sync 1");
+    syncPair(mac, nas);
+    dump("mac sync 1");
     m_clock->advanceSecond(1);
-    syncPair(win, nas); dump("win sync 2");
+    syncPair(win, nas);
+    dump("win sync 2");
     m_clock->advanceSecond(1);
-    syncPair(mac, nas); dump("mac sync 3");
+    syncPair(mac, nas);
+    dump("mac sync 3");
 
     const QString macSettings = mac->metadata()->customData()->value(CustomData::RemoteProgramSettings);
     const QString winSettings = win->metadata()->customData()->value(CustomData::RemoteProgramSettings);
     const QString nasSettings = nas->metadata()->customData()->value(CustomData::RemoteProgramSettings);
 
-    fprintf(stderr, "MAC: %s\nWIN: %s\nNAS: %s\n",
-            macSettings.toUtf8().constData(), winSettings.toUtf8().constData(),
+    fprintf(stderr,
+            "MAC: %s\nWIN: %s\nNAS: %s\n",
+            macSettings.toUtf8().constData(),
+            winSettings.toUtf8().constData(),
             nasSettings.toUtf8().constData());
 
     // Each client keeps its own commands.
@@ -1604,7 +1611,6 @@ Database* TestMerge::createTestDatabaseStructureClone(Database* source, int entr
     delete oldGroup;
     return db;
 }
-}
 
 /**
  * The NAS relay is reset and saved. That single save wipes every client.
@@ -1624,22 +1630,26 @@ void TestMerge::testRemoteSyncSettingsRelayReset()
     m_clock->advanceSecond(1);
     QSharedPointer<Database> nas(createTestDatabase());
 
-    auto dump=[&](const char* tag){
-        auto len=[](const QSharedPointer<Database>& d){
+    auto dump = [&](const char* tag) {
+        auto len = [](const QSharedPointer<Database>& d) {
             return d->metadata()->customData()->value(CustomData::RemoteProgramSettings).size();
         };
         fprintf(stderr, "%-18s MAC=%2d  WIN=%2d  NAS=%2d\n", tag, len(mac), len(win), len(nas));
     };
 
-    syncPair(mac, nas); dump("1 mac syncs");
-    syncPair(win, nas); dump("2 win syncs");
+    syncPair(mac, nas);
+    dump("1 mac syncs");
+    syncPair(win, nas);
+    dump("2 win syncs");
 
     m_clock->advanceSecond(1);
     nas->metadata()->customData()->set(CustomData::RemoteProgramSettings, "[]");
     dump("3 NAS saved []");
 
-    syncPair(mac, nas); dump("4 mac syncs");
-    syncPair(win, nas); dump("5 win syncs");
+    syncPair(mac, nas);
+    dump("4 mac syncs");
+    syncPair(win, nas);
+    dump("5 win syncs");
 
     QCOMPARE(mac->metadata()->customData()->value(CustomData::RemoteProgramSettings), settingsMac);
     QCOMPARE(win->metadata()->customData()->value(CustomData::RemoteProgramSettings), settingsWin);
@@ -1657,9 +1667,8 @@ void TestMerge::testRemoteSyncSettingsRelayReset()
 void TestMerge::testRemoteSyncPermanentDeletionPropagated()
 {
     QScopedPointer<Database> local(createTestDatabase());
-    QScopedPointer<Database> remote(createTestDatabaseStructureClone(local.data(),
-                                                                     Entry::CloneNoFlags,
-                                                                     Group::CloneIncludeEntries));
+    QScopedPointer<Database> remote(
+        createTestDatabaseStructureClone(local.data(), Entry::CloneNoFlags, Group::CloneIncludeEntries));
 
     local->metadata()->setRecycleBinEnabled(true);
     remote->metadata()->setRecycleBinEnabled(true);
